@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Member Re-engagement Strategy Builder — Skool Builders</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --paper: #F0EFE9; --surface: #FFFFFF; --surface2: #F7F6F2;
+  --border: rgba(12,26,39,0.10); --border-strong: rgba(12,26,39,0.18);
+  --midnight: #07111C; --blueprint: #0C1A27;
+  --mint: #00F5A0; --cyan: #00C8FF; --muted: #6B7A87;
+  --mint-fill: rgba(0,245,160,0.10); --mint-border: rgba(0,245,160,0.35);
+  --cyan-fill: rgba(0,200,255,0.08); --cyan-border: rgba(0,200,255,0.25);
+}
+html, body { background: var(--paper); color: var(--blueprint); font-family: 'Space Grotesk', sans-serif; min-height: 100vh; font-size: 15px; line-height: 1.65; }
+.wrap { max-width: 760px; margin: 0 auto; padding: 36px 28px 0; }
+
+.hero { position: relative; background: var(--midnight); border-radius: 12px; padding: 36px 32px 30px; margin-bottom: 32px; overflow: hidden; }
+.hero::before { content: ''; position: absolute; inset: 0; background-image: linear-gradient(rgba(18,50,74,0.7) 1px, transparent 1px), linear-gradient(90deg, rgba(18,50,74,0.7) 1px, transparent 1px); background-size: 28px 28px; pointer-events: none; }
+.corner { position: absolute; width: 12px; height: 12px; border-color: rgba(0,200,255,0.4); border-style: solid; }
+.c-tl { top: 10px; left: 10px; border-width: 1.5px 0 0 1.5px; }
+.c-tr { top: 10px; right: 10px; border-width: 1.5px 1.5px 0 0; }
+.c-bl { bottom: 10px; left: 10px; border-width: 0 0 1.5px 1.5px; }
+.c-br { bottom: 10px; right: 10px; border-width: 0 1.5px 1.5px 0; }
+.eyebrow { font-size: 10px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: #00C8FF; display: flex; align-items: center; gap: 8px; margin-bottom: 14px; position: relative; z-index: 1; }
+.eyebrow-line { width: 60px; height: 0.5px; background: #00C8FF; opacity: 0.35; }
+.hero h1 { font-family: 'Sora', sans-serif; font-size: clamp(22px, 4vw, 32px); font-weight: 800; color: #F7F7F2; line-height: 1.15; position: relative; z-index: 1; margin-bottom: 10px; }
+.hero h1 span { color: #00F5A0; }
+.hero p { font-size: 14px; color: #8FA3B0; position: relative; z-index: 1; max-width: 500px; line-height: 1.6; }
+
+.step-bar { display: flex; gap: 6px; margin-bottom: 24px; align-items: center; }
+.step-dot { width: 28px; height: 4px; border-radius: 2px; background: rgba(12,26,39,0.12); transition: background 0.3s; }
+.step-dot.active { background: #00C8FF; }
+.step-dot.done { background: rgba(0,200,255,0.35); }
+.step-label { font-size: 11px; color: var(--muted); margin-left: 8px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; }
+
+.form-section { background: var(--surface); border-radius: 10px; border: 0.5px solid var(--border-strong); padding: 28px; margin-bottom: 16px; display: none; box-shadow: 0 1px 4px rgba(12,26,39,0.06); }
+.form-section.active { display: block; }
+.section-header { display: flex; align-items: center; gap: 10px; margin-bottom: 22px; }
+.section-num { width: 26px; height: 26px; border-radius: 50%; background: var(--cyan-fill); border: 0.5px solid var(--cyan-border); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #0099CC; flex-shrink: 0; }
+.section-title { font-size: 15px; font-weight: 700; color: var(--blueprint); }
+
+.field { margin-bottom: 20px; }
+.field label { display: block; font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px; }
+.field input[type=text], .field textarea { width: 100%; background: var(--surface2); border: 0.5px solid var(--border-strong); border-radius: 8px; padding: 12px 14px; color: var(--blueprint); font-family: 'Space Grotesk', sans-serif; font-size: 14px; outline: none; transition: border-color 0.2s; }
+.field input[type=text]:focus, .field textarea:focus { border-color: #00C8FF; background: #fff; }
+.field input[type=text]::placeholder, .field textarea::placeholder { color: #A8B5BE; }
+.field textarea { min-height: 80px; resize: vertical; line-height: 1.5; }
+.field-note { font-size: 11px; color: var(--muted); margin-top: 6px; font-style: italic; }
+
+.chip-group { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { padding: 8px 14px; border-radius: 50px; border: 0.5px solid var(--border-strong); background: var(--surface2); color: var(--muted); font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.15s; font-family: 'Space Grotesk', sans-serif; user-select: none; }
+.chip:hover { border-color: #00C8FF; color: var(--blueprint); background: var(--cyan-fill); }
+.chip.selected { background: var(--mint-fill); border-color: var(--mint-border); color: #007A50; }
+.chip.multi.selected { background: var(--cyan-fill); border-color: var(--cyan-border); color: #0077AA; }
+
+.btn-row { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; gap: 12px; }
+.btn-back { background: var(--surface2); color: var(--blueprint); border: 0.5px solid var(--border-strong); border-radius: 50px; padding: 12px 22px; font-family: 'Space Grotesk', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; display: inline-flex; align-items: center; gap: 7px; transition: background 0.15s; }
+.btn-back:hover { background: #E8E6E0; }
+.btn-next { background: #00F5A0; color: #07111C; border: none; border-radius: 50px; padding: 13px 30px; font-family: 'Space Grotesk', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; box-shadow: 3px 3px 0 rgba(0,0,0,0.15); display: inline-flex; align-items: center; gap: 7px; transition: all 0.15s; }
+.btn-next:hover { transform: translateY(-1px); box-shadow: 4px 4px 0 rgba(0,0,0,0.18); background: #00E090; }
+.btn-next:active { transform: translateY(0); box-shadow: 2px 2px 0 rgba(0,0,0,0.12); }
+.err-msg { font-size: 12px; color: #C0392B; margin-top: 6px; display: none; }
+
+.output-area { display: none; }
+.output-area.visible { display: block; }
+
+.output-header { background: var(--surface); border-radius: 10px; border: 0.5px solid var(--border-strong); padding: 20px 24px; margin-bottom: 12px; box-shadow: 0 1px 4px rgba(12,26,39,0.06); }
+.output-header-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.output-title { font-family: 'Sora', sans-serif; font-size: 18px; font-weight: 700; color: var(--blueprint); margin-bottom: 8px; line-height: 1.3; }
+.output-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.tag-mini { display: inline-block; padding: 4px 10px; border-radius: 4px; font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
+.tag-mint { background: var(--mint-fill); color: #007A50; border: 0.5px solid var(--mint-border); }
+.tag-cyan { background: var(--cyan-fill); color: #0077AA; border: 0.5px solid var(--cyan-border); }
+.tag-muted { background: rgba(12,26,39,0.05); color: var(--muted); border: 0.5px solid var(--border); }
+.output-actions { display: flex; gap: 8px; flex-shrink: 0; }
+.btn-restart { background: transparent; color: var(--muted); border: 0.5px solid var(--border-strong); border-radius: 50px; padding: 9px 18px; font-family: 'Space Grotesk', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.15s; }
+.btn-restart:hover { color: var(--blueprint); border-color: rgba(12,26,39,0.3); }
+
+.acc-item { background: var(--surface); border-radius: 10px; border: 0.5px solid var(--border-strong); margin-bottom: 6px; box-shadow: 0 1px 3px rgba(12,26,39,0.05); overflow: hidden; }
+.acc-item.featured { border-color: rgba(0,200,130,0.3); }
+.acc-item.featured .acc-header { background: #F0FDF7; }
+.acc-header { display: flex; align-items: center; justify-content: space-between; padding: 18px 22px; cursor: pointer; user-select: none; transition: background 0.15s; gap: 12px; }
+.acc-header:hover { background: var(--surface2); }
+.acc-item.featured .acc-header:hover { background: #E8FAF2; }
+.acc-header-left { display: flex; align-items: center; gap: 12px; }
+.acc-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.acc-icon.mint { background: var(--mint-fill); }
+.acc-icon.cyan { background: var(--cyan-fill); }
+.acc-icon.muted { background: rgba(12,26,39,0.05); }
+.acc-label { font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 2px; }
+.acc-label.mint { color: #007A50; }
+.acc-label.cyan { color: #0099CC; }
+.acc-label.muted { color: var(--muted); }
+.acc-title { font-size: 15px; font-weight: 600; color: var(--blueprint); line-height: 1.3; }
+.acc-chevron { flex-shrink: 0; color: var(--muted); transition: transform 0.25s; }
+.acc-item.open .acc-chevron { transform: rotate(180deg); }
+.acc-body { display: none; padding: 0 22px 22px; }
+.acc-item.open .acc-body { display: block; }
+.acc-divider { height: 0.5px; background: var(--border); margin-bottom: 20px; }
+
+.out-text { font-size: 15px; color: #3D5060; line-height: 1.8; }
+.out-text-sm { font-size: 14px; color: #3D5060; line-height: 1.75; }
+
+.msg-envelope { background: #F8FBFF; border: 0.5px solid rgba(0,150,200,0.2); border-left: 3px solid #00C8FF; border-radius: 0 8px 8px 0; padding: 20px 80px 20px 22px; margin-bottom: 16px; position: relative; }
+.msg-envelope-label { font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #0099CC; margin-bottom: 10px; }
+.msg-headline { font-size: 16px; font-weight: 700; color: var(--blueprint); margin-bottom: 10px; line-height: 1.4; }
+.msg-body { font-size: 15px; color: #3D5060; line-height: 1.8; white-space: pre-wrap; }
+.copy-btn { position: absolute; top: 14px; right: 14px; background: var(--surface); color: var(--muted); border: 0.5px solid var(--border-strong); border-radius: 6px; padding: 6px 12px; font-family: 'Space Grotesk', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; transition: all 0.15s; white-space: nowrap; }
+.copy-btn:hover { border-color: #00C8FF; color: #0099CC; background: var(--cyan-fill); }
+.copy-btn.copied { color: #007A50; border-color: var(--mint-border); background: var(--mint-fill); }
+
+.cta-box { display: flex; align-items: flex-start; gap: 12px; background: #F0FDF7; border: 0.5px solid rgba(0,200,130,0.25); border-left: 3px solid #00F5A0; border-radius: 0 8px 8px 0; padding: 16px 18px; }
+.cta-label { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #007A50; margin-bottom: 5px; }
+.cta-text { font-size: 15px; color: var(--blueprint); line-height: 1.6; font-weight: 500; }
+
+.alt-version { background: var(--surface2); border-radius: 8px; border: 0.5px solid var(--border); padding: 18px 80px 18px 20px; margin-bottom: 10px; position: relative; }
+.alt-version:last-child { margin-bottom: 0; }
+.alt-version-label { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+
+.followup-item { display: flex; gap: 14px; padding: 14px 0; border-bottom: 0.5px solid var(--border); align-items: flex-start; }
+.followup-item:last-child { border-bottom: none; padding-bottom: 0; }
+.followup-num { min-width: 24px; height: 24px; border-radius: 50%; background: var(--cyan-fill); border: 0.5px solid var(--cyan-border); font-size: 11px; font-weight: 700; color: #0099CC; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+
+.pro-tip-box { background: #F0FDF7; border-radius: 8px; border: 0.5px solid rgba(0,200,130,0.2); padding: 18px 20px; }
+.pro-tip-label { font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #007A50; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+
+.cta-section { background: var(--midnight); border-radius: 12px; padding: 48px 36px; margin-top: 48px; text-align: center; position: relative; overflow: hidden; }
+.cta-section::before { content: ''; position: absolute; inset: 0; background-image: linear-gradient(rgba(18,50,74,0.6) 1px, transparent 1px), linear-gradient(90deg, rgba(18,50,74,0.6) 1px, transparent 1px); background-size: 28px 28px; pointer-events: none; }
+.cta-section .corner { border-color: rgba(0,200,255,0.35); }
+.cta-eyebrow { font-size: 10px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: #00C8FF; display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 16px; position: relative; z-index: 1; }
+.cta-eyebrow-line { width: 40px; height: 0.5px; background: #00C8FF; opacity: 0.35; }
+.cta-section h2 { font-family: 'Sora', sans-serif; font-size: clamp(20px, 3vw, 28px); font-weight: 800; color: #F7F7F2; line-height: 1.2; margin-bottom: 12px; position: relative; z-index: 1; }
+.cta-section > p { font-size: 14px; color: #8FA3B0; max-width: 480px; margin: 0 auto 28px; line-height: 1.65; position: relative; z-index: 1; }
+.cta-list { list-style: none; margin: 0 auto 32px; display: table; text-align: left; position: relative; z-index: 1; }
+.cta-list li { font-size: 13.5px; color: #C8D8E0; margin-bottom: 10px; display: flex; align-items: center; gap: 10px; }
+.cta-btn-wrap { position: relative; z-index: 1; }
+.cta-main-btn { display: inline-flex; align-items: center; gap: 8px; background: #00F5A0; color: #07111C; border: none; border-radius: 50px; padding: 15px 36px; font-family: 'Space Grotesk', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; box-shadow: 3px 3px 0 rgba(0,0,0,0.25); text-decoration: none; transition: all 0.15s; }
+.cta-main-btn:hover { background: #00E090; transform: translateY(-1px); box-shadow: 4px 4px 0 rgba(0,0,0,0.28); }
+.cta-subtext { font-size: 11px; color: #6B8090; margin-top: 12px; position: relative; z-index: 1; font-family: 'Fira Code', monospace; letter-spacing: 0.04em; }
+
+.footer { padding: 36px 0 40px; text-align: center; border-top: 0.5px solid var(--border); margin-top: 40px; }
+.footer-brand { font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
+.footer-links { display: flex; justify-content: center; gap: 24px; margin-bottom: 16px; }
+.footer-links a { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); text-decoration: none; transition: color 0.15s; }
+.footer-links a:hover { color: var(--blueprint); }
+.footer-copy { font-size: 11px; color: #A8B5BE; line-height: 1.7; max-width: 520px; margin: 0 auto; }
+.footer-copy a { color: #0099CC; text-decoration: none; }
+.footer-copy a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="hero">
+    <div class="corner c-tl"></div><div class="corner c-tr"></div>
+    <div class="corner c-bl"></div><div class="corner c-br"></div>
+    <div class="eyebrow">Skool Builders <div class="eyebrow-line"></div></div>
+    <h1>Member Re-engagement<br><span>Strategy Builder</span></h1>
+    <p>Bring quiet members back into the conversation without awkward mass messaging.</p>
+  </div>
+
+  <div class="step-bar" id="stepBar">
+    <div class="step-dot active" id="sd0"></div>
+    <div class="step-dot" id="sd1"></div>
+    <div class="step-dot" id="sd2"></div>
+    <div class="step-dot" id="sd3"></div>
+    <div class="step-dot" id="sd4"></div>
+    <span class="step-label" id="stepLabel">Step 1 of 5</span>
+  </div>
+
+  <div class="form-section active" id="step0">
+    <div class="section-header"><div class="section-num">1</div><div class="section-title">Your community</div></div>
+    <div class="field">
+      <label>What niche is your community in?</label>
+      <input type="text" id="niche" placeholder="e.g. Online fitness coaching, B2B SaaS, Parenting for working mums..." />
+      <div class="err-msg" id="e-niche">Please describe your community niche</div>
+    </div>
+    <div class="field">
+      <label>Community type</label>
+      <div class="chip-group" id="communityType">
+        <div class="chip" data-val="free">Free</div>
+        <div class="chip" data-val="paid">Paid</div>
+        <div class="chip" data-val="freemium">Freemium</div>
+      </div>
+      <div class="err-msg" id="e-type">Please select a community type</div>
+    </div>
+    <div class="btn-row"><div></div>
+      <button class="btn-next" onclick="goNext(0)">Next <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+    </div>
+  </div>
+
+  <div class="form-section" id="step1">
+    <div class="section-header"><div class="section-num">2</div><div class="section-title">The members</div></div>
+    <div class="field">
+      <label>Who are you trying to re-engage?</label>
+      <div class="chip-group" id="memberType">
+        <div class="chip multi" data-val="lurkers">Quiet lurkers</div>
+        <div class="chip multi" data-val="previously-active">Previously active</div>
+        <div class="chip multi" data-val="new-disappeared">New members who disappeared</div>
+        <div class="chip multi" data-val="former-paying">Former paying members</div>
+        <div class="chip multi" data-val="stopped-posting">Stopped posting</div>
+        <div class="chip multi" data-val="stopped-events">Stopped attending events</div>
+        <div class="chip multi" data-val="general">General inactive</div>
+      </div>
+      <div class="field-note">Select all that apply</div>
+      <div class="err-msg" id="e-member">Select at least one member type</div>
+    </div>
+    <div class="field">
+      <label>How long have they been inactive?</label>
+      <div class="chip-group" id="inactiveDuration">
+        <div class="chip" data-val="days">A few days</div>
+        <div class="chip" data-val="weeks">1-2 weeks</div>
+        <div class="chip" data-val="month">1 month</div>
+        <div class="chip" data-val="months">Several months</div>
+      </div>
+      <div class="err-msg" id="e-duration">Please select a duration</div>
+    </div>
+    <div class="btn-row">
+      <button class="btn-back" onclick="goBack(1)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg> Back</button>
+      <button class="btn-next" onclick="goNext(1)">Next <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+    </div>
+  </div>
+
+  <div class="form-section" id="step2">
+    <div class="section-header"><div class="section-num">3</div><div class="section-title">Goal and tone</div></div>
+    <div class="field">
+      <label>Main goal of re-engagement</label>
+      <div class="chip-group" id="reengagementGoal">
+        <div class="chip" data-val="commenting">Get commenting</div>
+        <div class="chip" data-val="participation">Increase participation</div>
+        <div class="chip" data-val="conversations">Back to conversations</div>
+        <div class="chip" data-val="events">Event attendance</div>
+        <div class="chip" data-val="resources">Resource usage</div>
+        <div class="chip" data-val="churn">Reduce churn</div>
+        <div class="chip" data-val="momentum">Rebuild momentum</div>
+        <div class="chip" data-val="renewals">Renewals / upgrades</div>
+      </div>
+      <div class="field-note">Select the one that most applies</div>
+      <div class="err-msg" id="e-goal">Please select a goal</div>
+    </div>
+    <div class="field">
+      <label>Messaging tone</label>
+      <div class="chip-group" id="tone">
+        <div class="chip" data-val="friendly">Friendly</div>
+        <div class="chip" data-val="playful">Playful</div>
+        <div class="chip" data-val="direct">Direct</div>
+        <div class="chip" data-val="encouraging">Encouraging</div>
+        <div class="chip" data-val="professional">Professional</div>
+        <div class="chip" data-val="community">Community-focused</div>
+      </div>
+      <div class="field-note">Select the one that most applies</div>
+      <div class="err-msg" id="e-tone">Please select a tone</div>
+    </div>
+    <div class="btn-row">
+      <button class="btn-back" onclick="goBack(2)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg> Back</button>
+      <button class="btn-next" onclick="goNext(2)">Next <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+    </div>
+  </div>
+
+  <div class="form-section" id="step3">
+    <div class="section-header"><div class="section-num">4</div><div class="section-title">Context and strategy type</div></div>
+    <div class="field">
+      <label>What's currently happening inside your community?</label>
+      <textarea id="communityActivity" placeholder="e.g. We just launched a 5-day challenge, great member wins in the feed, opening enrolment next week..."></textarea>
+    </div>
+    <div class="field">
+      <label>What kind of re-engagement strategy do you want?</label>
+      <div class="chip-group" id="strategyType">
+        <div class="chip" data-val="dm">Personal DM</div>
+        <div class="chip" data-val="post">Public post</div>
+        <div class="chip" data-val="comment">Comment prompt</div>
+        <div class="chip" data-val="poll">Poll idea</div>
+        <div class="chip" data-val="email">Email</div>
+        <div class="chip" data-val="conversation">Conversation starter</div>
+        <div class="chip" data-val="accountability">Accountability prompt</div>
+        <div class="chip" data-val="event">Event invitation</div>
+        <div class="chip" data-val="multistep">Multi-step strategy</div>
+      </div>
+      <div class="err-msg" id="e-strategy">Please select a strategy type</div>
+    </div>
+    <div class="btn-row">
+      <button class="btn-back" onclick="goBack(3)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg> Back</button>
+      <button class="btn-next" onclick="goNext(3)">Next <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+    </div>
+  </div>
+
+  <div class="form-section" id="step4">
+    <div class="section-header"><div class="section-num">5</div><div class="section-title">Your style</div></div>
+    <div class="field">
+      <label>How would you describe your personality as a host? <span style="font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></label>
+      <input type="text" id="hostStyle" placeholder="e.g. Warm and funny, no-BS direct, nurturing coach, high-energy..." />
+    </div>
+    <div class="field">
+      <label>Anything else we should know? <span style="font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></label>
+      <textarea id="extraContext" placeholder="e.g. We recently changed our pricing, a member just shared an incredible win, live session coming up..." style="min-height:64px"></textarea>
+    </div>
+    <div class="btn-row">
+      <button class="btn-back" onclick="goBack(4)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg> Back</button>
+      <button class="btn-next" onclick="buildStrategy()">Build my strategy <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></button>
+    </div>
+  </div>
+
+  <div class="output-area" id="outputArea">
+    <div id="outputHeader"></div>
+    <div class="accordion" id="accordionOutput"></div>
+  </div>
+
+  <div class="cta-section">
+    <div class="corner c-tl"></div><div class="corner c-tr"></div>
+    <div class="corner c-bl"></div><div class="corner c-br"></div>
+    <div class="cta-eyebrow"><div class="cta-eyebrow-line"></div>Skool Builders<div class="cta-eyebrow-line"></div></div>
+    <h2>Skool Builders is where Skool<br>hosts figure it out together.</h2>
+    <p>A paid implementation community for hosts growing education, expertise, and membership businesses on Skool.</p>
+    <ul class="cta-list">
+      <li><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect width="16" height="16" rx="3" fill="#00F5A0"/><path d="M4 8l2.5 2.5L12 5.5" stroke="#07111C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Weekly Build Sessions</li>
+      <li><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect width="16" height="16" rx="3" fill="#00F5A0"/><path d="M4 8l2.5 2.5L12 5.5" stroke="#07111C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Practical growth tools</li>
+      <li><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect width="16" height="16" rx="3" fill="#00F5A0"/><path d="M4 8l2.5 2.5L12 5.5" stroke="#07111C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Honest feedback</li>
+      <li><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect width="16" height="16" rx="3" fill="#00F5A0"/><path d="M4 8l2.5 2.5L12 5.5" stroke="#07111C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Real builders, not spectators</li>
+    </ul>
+    <div class="cta-btn-wrap">
+      <a href="https://www.skool.com/skool-builders/about" class="cta-main-btn" target="_blank">
+        Become a Founding Builder
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+    </div>
+    <div class="cta-subtext">Implementation community &nbsp;·&nbsp; Cancel any time</div>
+  </div>
+
+  <div class="footer">
+    <div class="footer-brand">Kylie Kelly</div>
+    <div class="footer-links">
+      <a href="https://kyliekelly.com/" target="_blank">kyliekelly.com</a>
+      <a href="https://kyliekelly.com/privacy-policy" target="_blank">Privacy Policy &amp; Terms</a>
+    </div>
+    <div class="footer-copy">
+      &copy; 2026 Kylie Kelly. All rights reserved.<br>
+      This resource is for members of Skool Builders. Educational use only, not financial or legal advice.<br>
+      By using this tool you agree to Kylie Kelly's <a href="https://kyliekelly.com/privacy-policy" target="_blank">Terms &amp; Conditions</a>.
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ─── NAV ──────────────────────────────────────────────────────────────────────
+let currentStep = 0;
+const totalSteps = 5;
+
+document.addEventListener('click', function(e) {
+  const chip = e.target.closest('.chip');
+  if (!chip) return;
+  const group = chip.closest('.chip-group');
+  const multi = chip.classList.contains('multi');
+  if (!multi) group.querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
+  chip.classList.toggle('selected');
+});
+
+function getSelected(id) {
+  return Array.from(document.querySelectorAll('#' + id + ' .chip.selected')).map(c => c.dataset.val);
+}
+function showErr(id, show) { document.getElementById(id).style.display = show ? 'block' : 'none'; }
+
+function goNext(step) {
+  let valid = true;
+  if (step === 0) {
+    if (!document.getElementById('niche').value.trim()) { showErr('e-niche', true); valid = false; } else showErr('e-niche', false);
+    if (!getSelected('communityType').length) { showErr('e-type', true); valid = false; } else showErr('e-type', false);
+  }
+  if (step === 1) {
+    if (!getSelected('memberType').length) { showErr('e-member', true); valid = false; } else showErr('e-member', false);
+    if (!getSelected('inactiveDuration').length) { showErr('e-duration', true); valid = false; } else showErr('e-duration', false);
+  }
+  if (step === 2) {
+    if (!getSelected('reengagementGoal').length) { showErr('e-goal', true); valid = false; } else showErr('e-goal', false);
+    if (!getSelected('tone').length) { showErr('e-tone', true); valid = false; } else showErr('e-tone', false);
+  }
+  if (step === 3) {
+    if (!getSelected('strategyType').length) { showErr('e-strategy', true); valid = false; } else showErr('e-strategy', false);
+  }
+  if (!valid) return;
+  document.getElementById('step' + step).classList.remove('active');
+  currentStep = step + 1;
+  document.getElementById('step' + currentStep).classList.add('active');
+  updateStepBar();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+function goBack(step) {
+  document.getElementById('step' + step).classList.remove('active');
+  currentStep = step - 1;
+  document.getElementById('step' + currentStep).classList.add('active');
+  updateStepBar();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+function updateStepBar() {
+  for (let i = 0; i < totalSteps; i++) {
+    const dot = document.getElementById('sd' + i);
+    dot.classList.remove('active', 'done');
+    if (i < currentStep) dot.classList.add('done');
+    if (i === currentStep) dot.classList.add('active');
+  }
+  if (!document.getElementById('outputArea').classList.contains('visible')) {
+    document.getElementById('stepLabel').textContent = 'Step ' + (currentStep + 1) + ' of ' + totalSteps;
+  }
+}
+function resetTool() {
+  document.getElementById('outputArea').classList.remove('visible');
+  document.getElementById('stepBar').style.display = 'flex';
+  document.querySelectorAll('.form-section').forEach((s, i) => s.classList.toggle('active', i === 0));
+  ['niche','hostStyle','extraContext','communityActivity'].forEach(id => document.getElementById(id).value = '');
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
+  currentStep = 0;
+  updateStepBar();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+function toggleAcc(id) {
+  document.getElementById(id).classList.toggle('open');
+}
+function copyText(text, btnEl) {
+  navigator.clipboard.writeText(text).then(() => {
+    btnEl.classList.add('copied');
+    const orig = btnEl.innerHTML;
+    btnEl.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Copied';
+    setTimeout(() => { btnEl.classList.remove('copied'); btnEl.innerHTML = orig; }, 2000);
+  });
+}
+
+// ─── TEMPLATE ENGINE ──────────────────────────────────────────────────────────
+
+// Niche classifier — maps free-text niche to a category
+function classifyNiche(niche) {
+  const n = niche.toLowerCase();
+  if (/fit|gym|workout|health|nutrition|weight|yoga|run|sport|athlet|body|wellness|diet/.test(n)) return 'fitness';
+  if (/parent|mum|mom|dad|family|kid|child|baby|toddler|teen/.test(n)) return 'parenting';
+  if (/b2b|saas|agency|freelan|consult|business|sales|market|seo|lead|linkedin|founder|startup|entrepreneur/.test(n)) return 'b2b';
+  if (/creat|youtu|instagram|tiktok|content|podcast|brand|influenc|social media|audience/.test(n)) return 'creator';
+  if (/coach|mentor|personal develop|mindset|life coach|productiv|habit|goal/.test(n)) return 'coaching';
+  if (/craft|hobby|art|music|photo|garden|cook|bak|knit|sew|DIY|game|chess/.test(n)) return 'hobby';
+  if (/educat|learn|teach|course|tutor|school|student|skill|certif/.test(n)) return 'education';
+  if (/wellbeing|mental health|meditat|mindful|spiritual|anxiety|therapy|healing|self-care/.test(n)) return 'wellness';
+  return 'general';
+}
+
+// Niche-specific openers by tone
+const nicheOpeners = {
+  fitness: {
+    friendly:     { open: 'Hey [name], just popping in to check in on you.', sub: 'We miss seeing your progress in here.' },
+    playful:      { open: 'Hey [name] — your consistency streak is calling.', sub: "It's been a little while and we want you back in the mix." },
+    direct:       { open: 'Hey [name], it\'s been a while since we\'ve seen you in the community.', sub: 'Wanted to reach out directly.' },
+    encouraging:  { open: 'Hey [name], just wanted to say — your goals haven\'t changed, even if life got busy.', sub: 'We\'re here whenever you\'re ready.' },
+    professional: { open: 'Hi [name], I wanted to follow up personally as we haven\'t seen you active recently.', sub: '' },
+    community:    { open: 'Hey [name], the community has been buzzing lately and I kept thinking of you.', sub: '' }
+  },
+  parenting: {
+    friendly:     { open: 'Hey [name], I know things get hectic — just wanted to check in.', sub: '' },
+    playful:      { open: 'Hey [name] — between the school runs and the chaos, I figured you might need this reminder.', sub: '' },
+    direct:       { open: 'Hi [name], I noticed you haven\'t been around lately and wanted to reach out.', sub: '' },
+    encouraging:  { open: 'Hey [name], parenting is a full-time job on top of everything else — we see you.', sub: '' },
+    professional: { open: 'Hi [name], I wanted to personally reach out as it\'s been a while since we\'ve connected.', sub: '' },
+    community:    { open: 'Hey [name], the community has been sharing some brilliant things lately — thought of you.', sub: '' }
+  },
+  b2b: {
+    friendly:     { open: 'Hey [name], just reaching out to see how things are going on your end.', sub: '' },
+    playful:      { open: 'Hey [name] — Q[X] is moving fast and I didn\'t want you to miss what\'s happening in here.', sub: '' },
+    direct:       { open: 'Hi [name], I noticed you haven\'t been active recently and wanted to check in directly.', sub: '' },
+    encouraging:  { open: 'Hey [name], whatever you\'re working through right now — we\'re a good room to think it through in.', sub: '' },
+    professional: { open: 'Hi [name], I wanted to follow up personally given it\'s been a while since we\'ve seen you in the community.', sub: '' },
+    community:    { open: 'Hey [name], there\'s some strong thinking happening in the community right now — your perspective would add a lot.', sub: '' }
+  },
+  creator: {
+    friendly:     { open: 'Hey [name], just checking in — how\'s everything going with your content lately?', sub: '' },
+    playful:      { open: 'Hey [name] — the algorithm can wait, but your community can\'t.', sub: '' },
+    direct:       { open: 'Hi [name], it\'s been a while since we\'ve seen you in here and I wanted to reach out.', sub: '' },
+    encouraging:  { open: 'Hey [name], every creator hits a slow patch — this community exists for exactly those moments.', sub: '' },
+    professional: { open: 'Hi [name], I wanted to personally follow up as you\'ve been quiet in the community recently.', sub: '' },
+    community:    { open: 'Hey [name], there\'s been some great conversation about growth and content strategy in here lately — thought of you.', sub: '' }
+  },
+  coaching: {
+    friendly:     { open: 'Hey [name], just wanted to check in and see how you\'re going.', sub: '' },
+    playful:      { open: 'Hey [name] — your future self called. They said to come back to the community.', sub: '' },
+    direct:       { open: 'Hi [name], I noticed you haven\'t been active recently and wanted to reach out.', sub: '' },
+    encouraging:  { open: 'Hey [name], progress isn\'t always linear — and this community is here for all the stages.', sub: '' },
+    professional: { open: 'Hi [name], I wanted to personally follow up as it\'s been a while since we\'ve seen you active.', sub: '' },
+    community:    { open: 'Hey [name], the community has been doing some incredible work lately and I kept thinking of you.', sub: '' }
+  },
+  hobby: {
+    friendly:     { open: 'Hey [name], just popping in to say hi and see how you\'re getting on.', sub: '' },
+    playful:      { open: 'Hey [name] — your [hobby] isn\'t going to enjoy itself without you.', sub: '' },
+    direct:       { open: 'Hi [name], it\'s been a while since we\'ve seen you around — wanted to check in.', sub: '' },
+    encouraging:  { open: 'Hey [name], there\'s no pressure here — just wanted to say the door\'s always open.', sub: '' },
+    professional: { open: 'Hi [name], I wanted to reach out as you\'ve been quiet in the community recently.', sub: '' },
+    community:    { open: 'Hey [name], the community has been sharing some amazing [work] lately — thought you\'d love it.', sub: '' }
+  },
+  education: {
+    friendly:     { open: 'Hey [name], just checking in to see how your learning journey is going.', sub: '' },
+    playful:      { open: 'Hey [name] — your brain misses learning new things. I can tell.', sub: '' },
+    direct:       { open: 'Hi [name], I noticed you haven\'t been active in the community recently and wanted to reach out.', sub: '' },
+    encouraging:  { open: 'Hey [name], learning at your own pace is completely valid — this community will be here when you\'re ready.', sub: '' },
+    professional: { open: 'Hi [name], I wanted to personally follow up as it\'s been a while since we\'ve seen you engaged.', sub: '' },
+    community:    { open: 'Hey [name], there\'s been some great discussion and shared resources in here lately — thought of you.', sub: '' }
+  },
+  wellness: {
+    friendly:     { open: 'Hey [name], just a gentle check-in to see how you\'re doing.', sub: '' },
+    playful:      { open: 'Hey [name] — self-care includes community. Just saying.', sub: '' },
+    direct:       { open: 'Hi [name], I noticed it\'s been a while since you\'ve been active and wanted to reach out.', sub: '' },
+    encouraging:  { open: 'Hey [name], wherever you are on your journey right now — you\'re welcome here exactly as you are.', sub: '' },
+    professional: { open: 'Hi [name], I wanted to personally reach out as we haven\'t seen you in the community for a while.', sub: '' },
+    community:    { open: 'Hey [name], the community has been creating such a warm, open space lately — you came to mind.', sub: '' }
+  },
+  general: {
+    friendly:     { open: 'Hey [name], just wanted to check in and say hi.', sub: '' },
+    playful:      { open: 'Hey [name] — the community called and it misses you.', sub: '' },
+    direct:       { open: 'Hi [name], I noticed you haven\'t been active recently and wanted to reach out directly.', sub: '' },
+    encouraging:  { open: 'Hey [name], no pressure at all — just wanted to let you know the door is always open.', sub: '' },
+    professional: { open: 'Hi [name], I wanted to personally follow up as we haven\'t seen you active in the community recently.', sub: '' },
+    community:    { open: 'Hey [name], there\'s been some great energy in the community lately — thought of you.', sub: '' }
+  }
+};
+
+// Goal-specific middle paragraphs
+const goalMiddle = {
+  commenting:    'There\'s a conversation happening right now that I think you\'d have something great to add to.',
+  participation: 'We\'ve been building some real momentum in here and your input genuinely makes a difference.',
+  conversations: 'Some of the best discussions have been happening lately and I\'d love to see you back in them.',
+  events:        'We\'ve got something coming up that I think would be worth your time — no big commitment, just show up.',
+  resources:     'There are some new resources in the classroom that are getting great feedback — worth a look when you have five minutes.',
+  churn:         'Before you make any decisions about your membership, I wanted to reach out personally.',
+  momentum:      'The community is in a really good place right now — lots of action and real progress being shared.',
+  renewals:      'I wanted to personally reach out before your renewal comes up to make sure you\'re getting value.'
+};
+
+// Duration context
+const durationContext = {
+  days:   { note: 'even a short gap', urgency: 'low' },
+  weeks:  { note: 'a couple of weeks', urgency: 'low' },
+  month:  { note: 'about a month', urgency: 'medium' },
+  months: { note: 'a while now', urgency: 'high' }
+};
+
+// Strategy-type CTAs
+const strategyCTA = {
+  dm:             { cta: 'Drop me a reply here — even just one word works.', format: 'Send this as a personal DM directly to the member by name.' },
+  post:           { cta: 'Drop a comment below — I read every single one.', format: 'Post this in your community feed to spark broad re-engagement.' },
+  comment:        { cta: 'Leave a comment on the post — even a quick reaction counts.', format: 'Use this as a comment on an existing popular post to pull people back in.' },
+  poll:           { cta: 'Vote in the poll — takes 10 seconds and helps shape where we go next.', format: 'Pair this message with a simple 2-3 option poll on a relevant topic.' },
+  email:          { cta: 'Hit reply and let me know — I read every response personally.', format: 'Send this via email to members who have gone quiet. Keep subject line short and personal.' },
+  conversation:   { cta: 'Answer the question in the comments — I\'d love to hear from you.', format: 'Post this as an open question to the whole community to restart organic conversation.' },
+  accountability: { cta: 'Comment with one thing you\'re working on this week — no detail needed.', format: 'Use this as a weekly accountability thread starter to rebuild the habit of showing up.' },
+  event:          { cta: 'RSVP below — even a maybe helps us plan. Hope to see you there.', format: 'Send this as a personal event invite, ideally 5-7 days before the event.' },
+  multistep:      { cta: 'Start with step one — reply to this message.', format: 'This is step one of a three-touch sequence. Follow up 3 days later with a resource, then 5 days after that with a direct question.' }
+};
+
+// Approach explanations — by member type and duration
+function getApproach(memberTypes, duration, goal, stratType, niche) {
+  const isLongGone = duration === 'months';
+  const isNew = memberTypes.includes('new-disappeared');
+  const isPaying = memberTypes.includes('former-paying') || memberTypes.includes('stopped-events');
+  const isLurker = memberTypes.includes('lurkers');
+
+  if (isNew) return 'New members who go quiet usually do so because the first week felt overwhelming or unclear. The best approach is a simple, warm check-in that reconnects them to the specific reason they joined — not a push to do more. Keep the ask tiny.';
+  if (isPaying && isLongGone) return 'When paying members go quiet for several months, a personal outreach that acknowledges their absence without guilt is key. Focus on what\'s changed or improved since they were last active, and make re-entry feel easy and low-stakes.';
+  if (isLurker) return 'Lurkers are often engaged readers who never quite took the step to participate. The goal isn\'t to force a comment — it\'s to create a moment where the barrier to participate feels so low they just do it. A simple, direct question works best.';
+  if (isLongGone) return 'Members who\'ve been gone for several months need a reason to care again, not a reminder that they\'ve been absent. Lead with what\'s changed, what\'s good right now, and a single low-friction way back in.';
+  return 'This situation calls for a warm, personal touch that reconnects members to the value they originally signed up for. Keep the message short, the tone genuine, and the ask small — one easy action is better than a list of options.';
+}
+
+// Why it works — by tone and goal
+function getWhyItWorks(tone, goal, duration) {
+  const psychMap = {
+    friendly:     'Friendly, low-pressure outreach works because it removes the fear of judgment. Members who\'ve been quiet often worry about re-entering — a warm, no-stakes message signals that it\'s safe to come back.',
+    playful:      'Playful messaging works because it sidesteps the awkward "I haven\'t been around" energy. Humour reduces tension and makes re-engagement feel light rather than obligatory.',
+    direct:       'Direct messaging works because it respects the member\'s time and intelligence. It signals that you noticed, you care, and you\'re not going to dance around it — which builds trust.',
+    encouraging:  'Encouraging messaging works because it meets members where they are rather than where you want them to be. It normalises the gap and removes shame, which is the most common reason people don\'t return.',
+    professional: 'Professional tone works for communities where members are busy, results-focused people. It signals that your time is respected and the outreach has a purpose — not just filling a quota.',
+    community:    'Community-focused messaging works because it reminds members that other people are in here, doing real things. Social proof and belonging are two of the strongest drivers of re-engagement.'
+  };
+  const goalLayer = {
+    churn:    ' Reaching out before a member churns is significantly more effective than trying to win them back after — the window of influence is now.',
+    renewals: ' Framing renewal outreach around value already received (not fear of losing access) dramatically improves conversion and goodwill.',
+    events:   ' Event invitations work best when they feel personal rather than broadcast — a direct ask is 3-4x more likely to convert than a general announcement.',
+    momentum: ''
+  };
+  return psychMap[tone] + (goalLayer[goal] || '');
+}
+
+// Follow-up ideas — by duration and member type
+function getFollowups(memberTypes, duration, goal, niche) {
+  const isLongGone = duration === 'months';
+  const base = [
+    'Three days later, share a specific piece of content from the community — a win, a tip, or a thread — with a note like "thought this might be relevant for you right now."',
+    'A week after your first message, ask a single direct question related to what they originally joined for. Keep it to one sentence.',
+    'If there\'s still no response after two touchpoints, let it rest for two to three weeks then try one final low-key check-in. Sometimes timing is everything.'
+  ];
+  if (isLongGone) return [
+    'If no reply after 4-5 days, follow up with a specific resource or win from the community that\'s directly relevant to why they joined — make it feel curated, not broadcast.',
+    'A week later, try a different channel if available (e.g. email if you DM\'d first, or vice versa). Keep it even shorter — two sentences max.',
+    'After two touchpoints with no response, remove them from your active re-engagement list. A clean community roster is better than chasing disengaged members indefinitely.'
+  ];
+  if (goal === 'renewals') return [
+    'If no reply in 3 days, follow up with a brief summary of what\'s happened in the community over the past 30 days — make the value tangible.',
+    'Two days before renewal, send a final personal message focused on what they\'d be coming back to, not what they\'d lose.',
+    'If they don\'t renew, send a short offboarding message that leaves the door open. Former members often return 3-6 months later.'
+  ];
+  return base;
+}
+
+// Alternate versions — tone variants
+function getAlternates(tone, goal, niche, opener) {
+  const alts = {
+    friendly: [
+      { label: 'More direct version', message: opener.open + ' I\'ll keep this short — ' + goalMiddle[goal].toLowerCase() + ' One question: what would make it worth showing up this week?' },
+      { label: 'More community-focused version', message: opener.open + ' The community has been building real momentum and your voice has been missed in it. ' + goalMiddle[goal] + ' Would love to see you back.' }
+    ],
+    playful: [
+      { label: 'Warmer version', message: 'Hey [name], no pressure at all — just wanted to check in and let you know we\'re here. ' + goalMiddle[goal] + ' Drop a reply whenever you\'re ready.' },
+      { label: 'More direct version', message: 'Hey [name], quick one. ' + goalMiddle[goal] + ' One small action is all it takes to get back in the swing of things. What\'s your current biggest challenge?' }
+    ],
+    direct: [
+      { label: 'Warmer version', message: 'Hey [name], just a quick check-in — no agenda, just wanted to make sure you\'re doing okay and that the community is still relevant for where you are right now. ' + goalMiddle[goal] },
+      { label: 'More community-focused version', message: 'Hey [name], ' + goalMiddle[goal] + ' The room is better with you in it. What would make it worth coming back this week?' }
+    ],
+    encouraging: [
+      { label: 'More playful version', message: 'Hey [name] — life happens, communities understand. ' + goalMiddle[goal] + ' What\'s one thing you\'ve been working on lately? Drop it in the comments.' },
+      { label: 'More direct version', message: 'Hey [name], ' + goalMiddle[goal] + ' No pressure to catch up on everything — just pick one thing and start there. What\'s the biggest thing on your plate right now?' }
+    ],
+    professional: [
+      { label: 'Warmer version', message: 'Hi [name], just a quick personal note — ' + goalMiddle[goal].toLowerCase() + ' I\'d love to hear how things are going for you and whether there\'s anything we can do to make the community more useful.' },
+      { label: 'More direct version', message: 'Hi [name], ' + goalMiddle[goal] + ' I\'d value your perspective on what would make re-engaging worthwhile. One reply is all I\'m asking for.' }
+    ],
+    community: [
+      { label: 'More personal version', message: 'Hey [name], I wanted to reach out directly rather than sending a group message. ' + goalMiddle[goal] + ' Your presence genuinely changes the energy in here.' },
+      { label: 'More direct version', message: 'Hey [name], ' + goalMiddle[goal] + ' What\'s one thing you\'d want to see more of in the community right now? Your answer would help shape where we go next.' }
+    ]
+  };
+  return alts[tone] || alts.friendly;
+}
+
+// Builder tips — by strategy type and niche category
+function getBuilderTip(stratType, nicheCategory, duration, communityType) {
+  const tips = {
+    dm: {
+      fitness:    'Personalise the DM by referencing something specific — their last post, a result they shared, or the goal they mentioned when they joined. Generic DMs get ignored; specific ones get replies.',
+      parenting:  'Keep DMs to parents short — three sentences maximum. They\'re time-poor. Lead with empathy, not a request.',
+      b2b:        'For B2B communities, a DM that references a specific business challenge (not just "we miss you") will outperform a generic check-in every time.',
+      creator:    'Creators respond well to curiosity — ask about their content or current project rather than about the community. It signals you see them as a person, not just a member.',
+      coaching:   'Reference the goal or intention they stated when they joined, if you have it. That reconnection to original purpose is often enough to bring someone back.',
+      hobby:      'A photo, a link, or a specific example of something the community has been creating is far more compelling than words alone for hobby communities.',
+      education:  'If you track module progress, a DM referencing where they left off ("You completed three modules — the next one is the one people say changed the most for them") is a powerful re-entry hook.',
+      wellness:   'Wellness community members are often quiet because they\'re struggling. Approach with care and zero pressure. Let them know there\'s no catching up required.',
+      general:    'Segment your outreach — even a simple split between "went quiet in first 30 days" vs "previously active" will dramatically improve your response rate.'
+    },
+    post: 'Pin your re-engagement post at the top of the community feed for 48-72 hours. Most inactive members who do log in will see it — but only if it\'s visible above the fold.',
+    comment: 'Go back through posts from the last 30 days and leave a genuine, specific comment on each one before you post your re-engagement message. Active hosts get more responses.',
+    poll: 'Keep poll options to 2-3 choices maximum. The easier the vote, the higher the participation rate. Use the poll results as a reason to follow up personally with people who voted.',
+    email: 'Subject line is everything for email. Try "[First name], quick question" or "Been a while — wanted to check in" over anything that looks like a newsletter.',
+    conversation: 'Post your conversation starter between 9am-11am or 7pm-9pm in your community\'s primary timezone. Engagement drops significantly outside these windows.',
+    accountability: 'Accountability prompts work best when you go first — share your own answer before asking members to share theirs. It removes the "blank page" effect.',
+    event: 'For event invitations, a personal DM outperforms a broadcast post by a significant margin. Even sending 20 personal invites manually will outperform a pinned post to 200 people.',
+    multistep: 'Space your three touchpoints at least 3-4 days apart. Back-to-back messages feel like pressure; spaced messages feel like genuine care. Track replies in a simple spreadsheet so nothing falls through the gaps.'
+  };
+  const tip = tips[stratType];
+  if (typeof tip === 'object') return tip[nicheCategory] || tip.general || Object.values(tip)[0];
+  return tip;
+}
+
+// Strategy title generator
+function getStrategyTitle(goal, memberTypes, duration, stratType) {
+  const goalTitles = {
+    commenting:    'Low-friction re-entry through conversation',
+    participation: 'Rebuilding participation from the ground up',
+    conversations: 'Getting quiet members back into dialogue',
+    events:        'A personal invite to get them back in the room',
+    resources:     'Value-first re-engagement via your best content',
+    churn:         'A proactive outreach before they walk away',
+    momentum:      'Reconnecting members to community energy',
+    renewals:      'A personal touch before renewal time'
+  };
+  return goalTitles[goal] || 'A tailored re-engagement approach for your community';
+}
+
+// Format label for display
+const memberLabels = { lurkers: 'Quiet lurkers', 'previously-active': 'Previously active', 'new-disappeared': 'New members who went quiet', 'former-paying': 'Former paying members', 'stopped-posting': 'Stopped posting', 'stopped-events': 'Stopped attending events', general: 'General inactive' };
+const durationLabels = { days: 'A few days inactive', weeks: '1-2 weeks inactive', month: '1 month inactive', months: 'Several months inactive' };
+const stratLabels = { dm: 'Personal DM', post: 'Public post', comment: 'Comment prompt', poll: 'Poll idea', email: 'Email', conversation: 'Conversation starter', accountability: 'Accountability prompt', event: 'Event invitation', multistep: 'Multi-step strategy' };
+
+// ─── MAIN BUILD ──────────────────────────────────────────────────────────────
+function buildStrategy() {
+  const niche       = document.getElementById('niche').value.trim();
+  const commType    = getSelected('communityType')[0];
+  const memberTypes = getSelected('memberType');
+  const duration    = getSelected('inactiveDuration')[0];
+  const goal        = getSelected('reengagementGoal')[0];
+  const tone        = getSelected('tone')[0];
+  const activity    = document.getElementById('communityActivity').value.trim();
+  const stratType   = getSelected('strategyType')[0];
+  const hostStyle   = document.getElementById('hostStyle').value.trim();
+
+  const nicheCategory = classifyNiche(niche);
+  const opener        = (nicheOpeners[nicheCategory] || nicheOpeners.general)[tone] || nicheOpeners.general.friendly;
+  const stratTitle    = getStrategyTitle(goal, memberTypes, duration, stratType);
+
+  // Build the message
+  const activityLine = activity ? 'Right now, ' + activity.charAt(0).toLowerCase() + activity.slice(1).replace(/\.$/, '') + '.' : '';
+  const msgBody = [
+    opener.open,
+    opener.sub,
+    goalMiddle[goal],
+    activityLine,
+    strategyCTA[stratType].cta
+  ].filter(Boolean).join(' ');
+
+  const approach   = getApproach(memberTypes, duration, goal, stratType, niche);
+  const whyWorks   = getWhyItWorks(tone, goal, duration);
+  const followups  = getFollowups(memberTypes, duration, goal, niche);
+  const alternates = getAlternates(tone, goal, niche, opener);
+  const tip        = getBuilderTip(stratType, nicheCategory, duration, commType);
+  const formatNote = strategyCTA[stratType].format;
+
+  // Render
+  document.getElementById('step4').classList.remove('active');
+  document.getElementById('stepBar').style.display = 'none';
+  document.getElementById('outputArea').classList.add('visible');
+
+  const icons = {
+    msg:     '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
+    bulb:    '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21h6m-6-4h6M12 3a7 7 0 0 1 4 12.95V17H8v-3.05A7 7 0 0 1 12 3z"/></svg>',
+    brain:   '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="12" rx="8" ry="7"/><path d="M12 5v14M5.2 9h13.6M5.2 15h13.6"/></svg>',
+    repeat:  '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>',
+    adj:     '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21v-7m0-4V3m8 18v-9m0-4V3m8 18v-5m0-4V3M1 14h6M9 8h6m2 5h6"/></svg>',
+    tool:    '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>',
+    copy:    '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>',
+    restart: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>',
+    chevron: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>'
+  };
+
+  // Header
+  document.getElementById('outputHeader').innerHTML =
+    '<div class="output-header" style="margin-bottom:12px">' +
+    '<div class="output-header-top">' +
+    '<div><div class="output-title">' + stratTitle + '</div>' +
+    '<div class="output-tags">' +
+    '<span class="tag-mini tag-mint">' + niche + '</span>' +
+    '<span class="tag-mini tag-cyan">' + (commType.charAt(0).toUpperCase() + commType.slice(1)) + '</span>' +
+    '<span class="tag-mini tag-cyan">' + stratLabels[stratType] + '</span>' +
+    '<span class="tag-mini tag-muted">' + durationLabels[duration] + '</span>' +
+    '</div></div>' +
+    '<div class="output-actions">' +
+    '<button class="btn-restart" onclick="resetTool()">' + icons.restart + ' Start over</button>' +
+    '</div></div></div>';
+
+  function accItem(id, iconKey, iconClass, labelClass, labelTxt, titleTxt, bodyHtml, open, featured) {
+    return '<div class="acc-item' + (featured ? ' featured' : '') + (open ? ' open' : '') + '" id="' + id + '">' +
+      '<div class="acc-header" onclick="toggleAcc(\'' + id + '\')">' +
+      '<div class="acc-header-left">' +
+      '<div class="acc-icon ' + iconClass + '">' + icons[iconKey] + '</div>' +
+      '<div><div class="acc-label ' + labelClass + '">' + labelTxt + '</div><div class="acc-title">' + titleTxt + '</div></div>' +
+      '</div><div class="acc-chevron">' + icons.chevron + '</div></div>' +
+      '<div class="acc-body"><div class="acc-divider"></div>' + bodyHtml + '</div></div>';
+  }
+
+  // 1. Messaging
+  const msgCopyText = opener.open + (opener.sub ? ' ' + opener.sub : '') + '\n\n' + goalMiddle[goal] + (activityLine ? ' ' + activityLine : '') + '\n\n' + strategyCTA[stratType].cta;
+  const msgHtml =
+    '<div class="msg-envelope" style="padding-right:80px">' +
+    '<div class="msg-envelope-label">Your message — ready to copy and send</div>' +
+    '<div class="msg-body">' + msgBody + '</div>' +
+    '<button class="copy-btn" id="copyMain" onclick="copyText(' + JSON.stringify(msgCopyText) + ', document.getElementById(\'copyMain\'))">' + icons.copy + ' Copy</button>' +
+    '</div>' +
+    '<div class="cta-box">' +
+    '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#007A50" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:2px"><path d="M5 12h14M12 5l7 7-7 7"/></svg>' +
+    '<div><div class="cta-label">Call to action</div><div class="cta-text">' + strategyCTA[stratType].cta + '</div></div></div>' +
+    '<p style="font-size:12px;color:var(--muted);margin-top:12px;font-style:italic">' + icons.tool.replace('16', '12').replace('16', '12') + ' ' + formatNote + '</p>';
+
+  // 2. Approach
+  const approachHtml = '<p class="out-text">' + approach + '</p>';
+
+  // 3. Why it works
+  const whyHtml = '<p class="out-text">' + whyWorks + '</p>';
+
+  // 4. Follow-ups
+  const followupHtml = followups.map((f, i) =>
+    '<div class="followup-item"><div class="followup-num">' + (i+1) + '</div><div class="out-text-sm">' + f + '</div></div>'
+  ).join('');
+
+  // 5. Alternates
+  const altHtml = alternates.map((v, i) =>
+    '<div class="alt-version">' +
+    '<div class="alt-version-label">' + v.label + '</div>' +
+    '<div class="out-text-sm">' + v.message + '</div>' +
+    '<button class="copy-btn" id="copyAlt' + i + '" onclick="copyText(' + JSON.stringify(v.message) + ', document.getElementById(\'copyAlt' + i + '\'))">' + icons.copy + ' Copy</button>' +
+    '</div>'
+  ).join('');
+
+  // 6. Tip
+  const tipHtml = '<div class="pro-tip-box"><div class="pro-tip-label">' + icons.tool + ' Builder tip</div><div class="out-text">' + tip + '</div></div>';
+
+  document.getElementById('accordionOutput').innerHTML =
+    accItem('acc-msg',      'msg',    'mint',  'mint',  'Suggested messaging',   'Ready-to-send message + CTA',        msgHtml,      true,  true) +
+    accItem('acc-approach', 'bulb',   'cyan',  'cyan',  'Recommended approach',  stratTitle,                           approachHtml, false, false) +
+    accItem('acc-why',      'brain',  'cyan',  'cyan',  'Why this works',        'The psychology behind this strategy',whyHtml,      false, false) +
+    accItem('acc-followup', 'repeat', 'muted', 'muted', 'If they don\'t respond','3 follow-up ideas',                  followupHtml, false, false) +
+    accItem('acc-alts',     'adj',    'muted', 'muted', 'Alternate versions',    '2 different tone variations',        altHtml,      false, false) +
+    accItem('acc-tip',      'tool',   'mint',  'mint',  'Builder tip',           'One thing to do right now',          tipHtml,      false, false);
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+</body>
+</html>
